@@ -7,7 +7,7 @@ import           Test.Hspec
 spec :: Spec
 spec =
   describe "CPU" $ do
-    describe "LDA"$ do
+    describe "LDA" $ do
       describe "Immediate" $ do
         it "Should load data to Register A from Immediate address" $ do
           let cpu = loadAndRun newCpu [0xA9, 0x11, 0x00]
@@ -124,3 +124,60 @@ spec =
         zf `shouldBe` True
         nf `shouldBe` False
         vf `shouldBe` True
+
+    describe "ADC" $ do
+      it "Should add two positive numbers" $ do
+        let cpu = loadAndRun newCpu [0xA9, 0x05, 0x69, 0x03, 0x00]
+
+        let zf = testBit (status cpu) 1
+        let nf = testBit (status cpu) 7
+        let vf = testBit (status cpu) 6
+        let cf = testBit (status cpu) (fromEnum Carry)
+
+        registerA cpu `shouldBe` 0x08
+        cf `shouldBe` False
+        zf `shouldBe` False
+        nf `shouldBe` False
+        vf `shouldBe` False
+
+      it "Should add a negative number to a positive number" $ do
+        let cpu = loadAndRun newCpu [0xA9, 0x80, 0x69, 0xFF, 0x00]
+
+        let zf = testBit (status cpu) 1
+        let nf = testBit (status cpu) 7
+        let vf = testBit (status cpu) 6
+        let cf = testBit (status cpu) (fromEnum Carry)
+
+        registerA cpu `shouldBe` 0x7F
+        cf `shouldBe` True
+        zf `shouldBe` False
+        nf `shouldBe` False
+        vf `shouldBe` True
+
+      it "Should add a positive number to a negative number" $ do
+        let cpu = loadAndRun newCpu [0xA9, 0xFF, 0x69, 0x80, 0x00]
+
+        let zf = testBit (status cpu) 1
+        let nf = testBit (status cpu) 7
+        let vf = testBit (status cpu) 6
+        let cf = testBit (status cpu) (fromEnum Carry)
+
+        registerA cpu `shouldBe` 0x7F
+        cf `shouldBe` True
+        zf `shouldBe` False
+        nf `shouldBe` False
+        vf `shouldBe` True
+
+      it "adds two negative numbers" $ do                                                               
+        let cpu = loadAndRun newCpu [0xA9, 0x81, 0x69, 0xFF, 0x00] 
+
+        let zf = testBit (status cpu) 1
+        let nf = testBit (status cpu) 7
+        let vf = testBit (status cpu) 6
+        let cf = testBit (status cpu) (fromEnum Carry)
+        
+        registerA cpu `shouldBe` 0x80                                                               
+        cf `shouldBe` True                                                        
+        zf `shouldBe` False                                                        
+        nf `shouldBe` True                                                     
+        vf `shouldBe` False

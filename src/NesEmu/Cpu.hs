@@ -18,6 +18,7 @@ reset cpu =
   cpu
     { registerA = 0,
       registerX = 0,
+      registerY = 0,
       status = 0,
       programCounter = memoryRead16 cpu 0xFFFC
     }
@@ -50,8 +51,8 @@ run :: Cpu -> Cpu
 run cpu =
   case opcode of
     0x00 -> brk (incPc 1 cpu)
-    0xAA -> run $ tax (incPc 1 cpu)
-    0xE8 -> run $ inx (incPc 1 cpu)
+    0xAA -> run . incPc 0 $ tax (incPc 1 cpu)
+    0xE8 -> run . incPc 0 $ inx (incPc 1 cpu)
     0xA9 -> run . incPc 1 $ lda (incPc 1 cpu) Immediate
     0xA5 -> run . incPc 1 $ lda (incPc 1 cpu) ZeroPage
     0xB5 -> run . incPc 1 $ lda (incPc 1 cpu) ZeroPageX
@@ -62,11 +63,12 @@ run cpu =
     0xB1 -> run . incPc 1 $ lda (incPc 1 cpu) IndirectY
     0x85 -> run . incPc 1 $ sta (incPc 1 cpu) ZeroPage
     0x95 -> run . incPc 1 $ sta (incPc 1 cpu) ZeroPageX
-    0x8D -> run . incPc 1 $ sta (incPc 2 cpu) Absolute
-    0x9D -> run . incPc 1 $ sta (incPc 2 cpu) AbsoluteX
-    0x99 -> run . incPc 1 $ sta (incPc 2 cpu) AbsoluteY
+    0x8D -> run . incPc 2 $ sta (incPc 1 cpu) Absolute
+    0x9D -> run . incPc 2 $ sta (incPc 1 cpu) AbsoluteX
+    0x99 -> run . incPc 2 $ sta (incPc 1 cpu) AbsoluteY
     0x81 -> run . incPc 1 $ sta (incPc 1 cpu) IndirectX
     0x91 -> run . incPc 1 $ sta (incPc 1 cpu) IndirectY
+    0x69 -> run . incPc 1 $ adc (incPc 1 cpu) Immediate
     _    -> undefined
   where
     opcode = memoryRead cpu (programCounter cpu)
@@ -132,6 +134,9 @@ setFlag flag val s = f s (fromEnum flag)
   where
     f = if val then setBit else clearBit
 
+getFlag :: Cpu -> Flag -> Bool
+getFlag cpu flag = testBit (status cpu) (fromEnum flag)
+
 setZF :: Word8 -> Word8 -> Word8
 setZF = setFlag Zero . (== 0)
 
@@ -140,6 +145,9 @@ setNF = setFlag Negative . flip testBit (fromEnum Negative)
 
 setVF :: Word8 -> Word8 -> Word8
 setVF = setFlag Overflow . (== 0xFF)
+
+setCF :: Bool -> Word8 -> Word8
+setCF = setFlag Carry
 
 -- Memory Access
 memoryWrite :: Cpu -> Word16 -> Word8 -> Cpu
@@ -190,6 +198,21 @@ tax cpu =
     }
   where
     result = registerA cpu
+
+adc :: Cpu -> AddressingMode -> Cpu
+adc cpu addrMode =
+  cpu
+    { registerA = fromIntegral result .&. 0xFF,
+      status = setCF cf $ setVF overflow $ setZF result' $ setNF result' $ status cpu
+    }
+  where
+    addr = getOperandAddress cpu addrMode
+    val = memoryRead cpu addr
+    carry = if getFlag cpu Carry then 1 else 0
+    result = fromIntegral (registerA cpu) + fromIntegral val + carry :: Int
+    result' = fromIntegral (result .&. 0xFF)
+    cf = getFlag cpu Zero || result > 0xFF
+    overflow = if (complement (xor (registerA cpu) val) .&. xor (registerA cpu) result') .&. 0x80 > 0 then 0xFF else 0x00
 
 inx :: Cpu -> Cpu
 inx cpu =

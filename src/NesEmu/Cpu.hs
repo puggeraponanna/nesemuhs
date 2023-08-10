@@ -119,14 +119,14 @@ getOperandAddress _ NoneAddressing = undefined
 
 -- Set Flags
 data Flag
-  = Carry
-  | Zero
-  | Interrupt
-  | Decimal
-  | Nop1
-  | Nop2
-  | Overflow
-  | Negative
+  = CarryF
+  | ZeroF
+  | InterruptF
+  | DecimalF
+  | Nop1F
+  | Nop2F
+  | OverflowF
+  | NegativeF
   deriving (Enum)
 
 setFlag :: Flag -> Bool -> Word8 -> Word8
@@ -138,16 +138,16 @@ getFlag :: Cpu -> Flag -> Bool
 getFlag cpu flag = testBit (status cpu) (fromEnum flag)
 
 setZF :: Word8 -> Word8 -> Word8
-setZF = setFlag Zero . (== 0)
+setZF = setFlag ZeroF . (== 0)
 
 setNF :: Word8 -> Word8 -> Word8
-setNF = setFlag Negative . flip testBit (fromEnum Negative)
+setNF = setFlag NegativeF . flip testBit (fromEnum NegativeF)
 
 setVF :: Word8 -> Word8 -> Word8
-setVF = setFlag Overflow . (== 0xFF)
+setVF = setFlag OverflowF . (== 0xFF)
 
 setCF :: Bool -> Word8 -> Word8
-setCF = setFlag Carry
+setCF = setFlag CarryF
 
 -- Memory Access
 memoryWrite :: Cpu -> Word16 -> Word8 -> Cpu
@@ -177,51 +177,57 @@ memoryRead16 cpu addr = (hi `shiftL` 8) + lo
 -- Operations
 lda :: Cpu -> AddressingMode -> Cpu
 lda cpu addrMode =
-  let addr = getOperandAddress cpu addrMode
-      val = memoryRead cpu addr
-   in cpu
-        { registerA = val,
-          status = setZF val $ setNF val $ status cpu
-        }
+  cpu
+    { registerA = result,
+      status = updateStatus cpu
+    }
+  where
+    addr = getOperandAddress cpu addrMode
+    result = memoryRead cpu addr
+    updateStatus = setZF result . setNF result . status
 
 sta :: Cpu -> AddressingMode -> Cpu
 sta cpu addrMode =
-  let addr = getOperandAddress cpu addrMode
-      val = registerA cpu
-   in memoryWrite cpu addr val
+  memoryWrite cpu addr val
+  where
+    addr = getOperandAddress cpu addrMode
+    val = registerA cpu
 
 tax :: Cpu -> Cpu
 tax cpu =
   cpu
     { registerX = result,
-      status = setZF result $ setNF result $ status cpu
+      status = updateStatus cpu
     }
   where
     result = registerA cpu
+    updateStatus = setZF result . setNF result . status
 
 adc :: Cpu -> AddressingMode -> Cpu
 adc cpu addrMode =
   cpu
     { registerA = fromIntegral result .&. 0xFF,
-      status = setCF cf $ setVF overflow $ setZF result' $ setNF result' $ status cpu
+      status = updateStatus cpu
     }
   where
     addr = getOperandAddress cpu addrMode
-    val = memoryRead cpu addr
-    carry = if getFlag cpu Carry then 1 else 0
-    result = fromIntegral (registerA cpu) + fromIntegral val + carry :: Int
+    arg = memoryRead cpu addr
+    carry = if getFlag cpu CarryF then 1 else 0
+    result = fromIntegral (registerA cpu) + fromIntegral arg + carry :: Int
     result' = fromIntegral (result .&. 0xFF)
-    cf = getFlag cpu Zero || result > 0xFF
-    overflow = if (complement (xor (registerA cpu) val) .&. xor (registerA cpu) result') .&. 0x80 > 0 then 0xFF else 0x00
+    cf = getFlag cpu ZeroF || result > 0xFF
+    overflow = if (complement (xor (registerA cpu) arg) .&. xor (registerA cpu) result') .&. 0x80 > 0 then 0xFF else 0x00
+    updateStatus = setCF cf . setVF overflow . setZF result' . setNF result' . status
 
 inx :: Cpu -> Cpu
 inx cpu =
   cpu
     { registerX = result,
-      status = setVF (registerX cpu) $ setZF result $ setNF result $ status cpu
+      status = updateStatus cpu
     }
   where
     result = registerX cpu + 1
+    updateStatus = setVF (registerX cpu) . setZF result . setNF result . status
 
 brk :: Cpu -> Cpu
 brk cpu = cpu

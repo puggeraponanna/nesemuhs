@@ -15,10 +15,7 @@ getFlag :: Flag -> Cpu -> Bool
 getFlag flag cpu = testBit (status cpu) (fromEnum flag)
 
 setZF :: Word8 -> Cpu -> Cpu
-setZF result cpu =
-  if result == 0
-    then setFlag Zero True cpu
-    else setFlag Zero False cpu
+setZF result = setFlag Zero (result == 0)
 
 setNF :: Word8 -> Cpu -> Cpu
 setNF result = setFlag Negative (testBit result 7)
@@ -26,5 +23,5 @@ setNF result = setFlag Negative (testBit result 7)
 setCF :: Bool -> Cpu -> Cpu
 setCF = setFlag Carry
 
-setVF :: Word8 -> Word8 -> Cpu -> Cpu
-setVF a b = setFlag Overflow ((a ^ b) .&. 0x80 == 0x80)
+setVF :: Word8 -> Word8 -> Word8 -> Cpu -> Cpu
+setVF a b c = setFlag Overflow ((complement (a `xor` b) .&. (a `xor` c) .&. 0x80) == 0x80)

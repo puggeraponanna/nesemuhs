@@ -43,9 +43,9 @@ adc :: Cpu -> AddressingMode -> Cpu
 adc cpu addrMode =
   let a = registerA cpu
       b = memoryRead cpu (getOperandAddress cpu addrMode)
-      carry = if getFlag Carry cpu then 1 else 0
-      result = a + b + carry
-      status' = status $ setZF result $ setNF result $ setCF (result > 255) $ setVF a b cpu
+      c = if getFlag Carry cpu then 1 else 0
+      result = a + b + c
+      status' = status $ setZF result $ setNF result $ setCF (result > 255) $ setVF a b c cpu
    in cpu
         { registerA = result,
           status = status'
@@ -55,9 +55,9 @@ sbc :: Cpu -> AddressingMode -> Cpu
 sbc cpu addrMode =
   let a = registerA cpu
       b = memoryRead cpu (getOperandAddress cpu addrMode)
-      carry = if getFlag Carry cpu then 1 else 0
-      result = a - b - carry
-      status' = status $ setZF result $ setNF result $ setCF (result > 255) $ setVF a b cpu
+      c = if getFlag Carry cpu then 1 else 0
+      result = a - b - c
+      status' = status $ setZF result $ setNF result $ setCF (result > 255) $ setVF a b c cpu
    in cpu
         { registerA = result,
           status = status'
@@ -66,7 +66,7 @@ sbc cpu addrMode =
 inx :: Cpu -> Cpu
 inx cpu =
   let result = registerX cpu + 1
-      status' = status $ setZF result $ setNF result $ setVF result 1 cpu
+      status' = status $ setZF result $ setNF result $ setVF result 1 0 cpu
    in cpu
         { registerX = result,
           status = status'

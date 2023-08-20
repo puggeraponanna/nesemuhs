@@ -37,3 +37,21 @@ spec = do
     it "clears the N flag if bit 7 of result is 0" $ do
       let cpu = setNF 0x00 newCpu
       getFlag Negative cpu `shouldBe` False
+
+  describe "setCF" $ do
+    it "sets the carry flag to True" $ do
+      let cpu = setCF True newCpu
+      getFlag Carry cpu `shouldBe` True
+
+    it "sets the carry flag to False" $ do
+      let cpu = setCF False newCpu
+      getFlag Carry cpu `shouldBe` False
+
+  describe "setVF" $ do
+    it "sets overflow flag if result is 0xFF" $ do
+      let cpu = setVF 0x80 0x80 0x00 newCpu
+      getFlag Overflow cpu `shouldBe` True
+
+    it "clears overflow flag if result is not 0xFF" $ do
+      let cpu = setVF 0x80 0x01 0x00 newCpu
+      getFlag Overflow cpu `shouldBe` False

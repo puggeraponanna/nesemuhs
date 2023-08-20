@@ -69,7 +69,22 @@ run cpu =
     0x81 -> run . incPc 1 $ sta (incPc 1 cpu) IndirectX
     0x91 -> run . incPc 1 $ sta (incPc 1 cpu) IndirectY
     0x69 -> run . incPc 1 $ adc (incPc 1 cpu) Immediate
-    _    -> undefined
+    0x65 -> run . incPc 1 $ adc (incPc 1 cpu) ZeroPage
+    0x75 -> run . incPc 1 $ adc (incPc 1 cpu) ZeroPageX
+    0x6D -> run . incPc 2 $ adc (incPc 1 cpu) Absolute
+    0x7D -> run . incPc 2 $ adc (incPc 1 cpu) AbsoluteX
+    0x79 -> run . incPc 2 $ adc (incPc 1 cpu) AbsoluteY
+    0x61 -> run . incPc 1 $ adc (incPc 1 cpu) IndirectX
+    0x71 -> run . incPc 1 $ adc (incPc 1 cpu) IndirectY
+    0xE9 -> run . incPc 1 $ sbc (incPc 1 cpu) Immediate
+    0xE5 -> run . incPc 1 $ sbc (incPc 1 cpu) ZeroPage
+    0xF5 -> run . incPc 1 $ sbc (incPc 1 cpu) ZeroPageX
+    0xED -> run . incPc 2 $ sbc (incPc 1 cpu) Absolute
+    0xFD -> run . incPc 2 $ sbc (incPc 1 cpu) AbsoluteX
+    0xF9 -> run . incPc 2 $ sbc (incPc 1 cpu) AbsoluteY
+    0xE1 -> run . incPc 1 $ sbc (incPc 1 cpu) IndirectX
+    0xF1 -> run . incPc 1 $ sbc (incPc 1 cpu) IndirectY
+    _    -> error "Unknown opcode"
   where
     opcode = memoryRead cpu (programCounter cpu)
     incPc i a = a {programCounter = programCounter a + i}
@@ -89,7 +104,9 @@ data AddressingMode
 
 getOperandAddress :: Cpu -> AddressingMode -> Word16
 getOperandAddress cpu Immediate = programCounter cpu
-getOperandAddress cpu ZeroPage = fromIntegral $ memoryRead cpu (programCounter cpu)
+getOperandAddress cpu ZeroPage =
+  fromIntegral $
+    memoryRead cpu (programCounter cpu)
 getOperandAddress cpu Absolute = memoryRead16 cpu (programCounter cpu)
 getOperandAddress cpu ZeroPageX =
   let pos = memoryRead cpu (programCounter cpu)
@@ -162,7 +179,7 @@ memoryWrite cpu addr val =
 memoryWrite16 :: Cpu -> Word16 -> Word16 -> Cpu
 memoryWrite16 cpu addr val = memoryWrite (memoryWrite cpu addr lo) (addr + 1) hi
   where
-    lo = fromIntegral $ (val .&. 0xFF)
+    lo = fromIntegral (val .&. 0xFF)
     hi = fromIntegral $ val `shiftR` 8
 
 memoryRead :: Cpu -> Word16 -> Word8
@@ -212,7 +229,29 @@ adc cpu addrMode =
     result = fromIntegral (registerA cpu) + fromIntegral val + carry :: Int
     result' = fromIntegral (result .&. 0xFF)
     cf = getFlag cpu Zero || result > 0xFF
-    overflow = if (complement (xor (registerA cpu) val) .&. xor (registerA cpu) result') .&. 0x80 > 0 then 0xFF else 0x00
+    overflow =
+      if ( complement (xor (registerA cpu) val)
+             .&. xor (registerA cpu) result'
+         )
+        .&. 0x80
+        > 0
+        then 0xFF
+        else 0x00
+
+sbc :: Cpu -> AddressingMode -> Cpu
+sbc cpu addrMode =
+  cpu
+    { registerA = fromIntegral result .&. 0xFF,
+      status = setCF cf $ setVF overflow $ setZF result' $ setNF result' $ status cpu
+    }
+  where
+    addr = getOperandAddress cpu addrMode
+    val = memoryRead cpu addr
+    carry = if getFlag cpu Carry then 1 else 0
+    result = fromIntegral (registerA cpu) - fromIntegral val - carry :: Int
+    result' = fromIntegral (result .&. 0xFF)
+    cf = getFlag cpu Zero && result < 0
+    overflow = if xor (registerA cpu) val .&. xor (registerA cpu) result' .&. 0x80 > 0 then 0xFF else 0x00
 
 inx :: Cpu -> Cpu
 inx cpu =

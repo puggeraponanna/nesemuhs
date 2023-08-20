@@ -168,16 +168,65 @@ spec =
         nf `shouldBe` False
         vf `shouldBe` True
 
-      it "adds two negative numbers" $ do                                                               
-        let cpu = loadAndRun newCpu [0xA9, 0x81, 0x69, 0xFF, 0x00] 
+      it "adds two negative numbers" $ do
+        let cpu = loadAndRun newCpu [0xA9, 0x81, 0x69, 0xFF, 0x00]
 
         let zf = testBit (status cpu) 1
         let nf = testBit (status cpu) 7
         let vf = testBit (status cpu) 6
         let cf = testBit (status cpu) (fromEnum Carry)
-        
-        registerA cpu `shouldBe` 0x80                                                               
-        cf `shouldBe` True                                                        
-        zf `shouldBe` False                                                        
-        nf `shouldBe` True                                                     
+
+        registerA cpu `shouldBe` 0x80
+        cf `shouldBe` True
+        zf `shouldBe` False
+        nf `shouldBe` True
         vf `shouldBe` False
+    describe "SBC" $ do
+      describe "Immediate" $ do
+        it "subtracts an immediate value from the accumulator" $ do
+          let cpu = loadAndRun newCpu [0xA9, 0x05, 0xE9, 0x03, 0x00]
+          registerA cpu `shouldBe` 0x02
+
+      describe "ZeroPage" $ do
+        it "subtracts a zeropage value from the accumulator" $ do
+          let cpu = loadAndRun newCpu [0xA9, 0x05, 0xE5, 0x10, 0x00]
+              cpu' = memoryWrite cpu 0x10 0x03
+          registerA cpu' `shouldBe` 0x02
+
+      describe "ZeroPageX" $ do
+        it "subtracts a zeropage,X value from the accumulator" $ do
+          let cpu = loadAndRun newCpu [0xA9, 0x05, 0xA2, 0x02, 0xF5, 0x10, 0x00]
+              cpu' = memoryWrite cpu 0x12 0x03
+          registerA cpu' `shouldBe` 0x02
+
+      describe "Absolute" $ do
+        it "subtracts an absolute value from the accumulator" $ do
+          let cpu' = loadAndRun newCpu [0xA9, 0x05, 0xED, 0x10, 0x00]
+              cpu = memoryWrite cpu 0x10 0x03
+          registerA cpu' `shouldBe` 0x02
+
+      describe "AbsoluteX" $ do
+        it "subtracts an absolute,X value from the accumulator" $ do
+          let cpu = loadAndRun newCpu [0xA9, 0x05, 0xA2, 0x02, 0xFD, 0x10, 0x00]
+              cpu' = memoryWrite cpu 0x12 0x03
+          registerA cpu' `shouldBe` 0x02
+
+      describe "AbsoluteY" $ do
+        it "subtracts an absolute,Y value from the accumulator" $ do
+          let cpu = loadAndRun newCpu [0xA9, 0x05, 0xA0, 0x02, 0xF9, 0x10, 0x00]
+              cpu' = memoryWrite cpu 0x12 0x03
+          registerA cpu' `shouldBe` 0x02
+
+      describe "IndirectX" $ do
+        it "subtracts an (indirect,X) value from the accumulator" $ do
+          let cpu = loadAndRun newCpu [0xA9, 0x05, 0xA2, 0x02, 0xE1, 0x10, 0x00]
+              cpu' = memoryWrite cpu 0x12 0x10
+              cpu'' = memoryWrite cpu' 0x10 0x03
+          registerA cpu'' `shouldBe` 0x02
+
+      describe "IndirectY" $ do
+        it "subtracts an (indirect),Y value from the accumulator" $ do
+          let cpu = loadAndRun newCpu [0xA9, 0x05, 0xA0, 0x02, 0xF1, 0x10, 0x00]
+              cpu' = memoryWrite cpu 0x10 0x12
+              cpu'' = memoryWrite cpu' 0x14 0x03
+          registerA cpu'' `shouldBe` 0x02

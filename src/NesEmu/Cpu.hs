@@ -2,9 +2,9 @@ module NesEmu.Cpu where
 
 import           Data.Word
 import           NesEmu.Cpu.Memory
+import           NesEmu.Cpu.Opcodes
+import           NesEmu.Cpu.Operations
 import           NesEmu.Cpu.Types
-import NesEmu.Cpu.Opcodes 
-import NesEmu.Cpu.Operations
 
 reset :: Cpu -> Cpu
 reset cpu =
@@ -43,45 +43,49 @@ loadProgram cpu pgm =
 run :: Cpu -> Cpu
 run cpu =
   case opcode of
-    0x00 -> brk (incPc 1 cpu)
-    0xAA -> run . incPc 0 $ tax (incPc 1 cpu)
-    0xE8 -> run . incPc 0 $ inx (incPc 1 cpu)
-    0xA9 -> run . incPc 1 $ lda (incPc 1 cpu) Immediate
-    0xA5 -> run . incPc 1 $ lda (incPc 1 cpu) ZeroPage
-    0xB5 -> run . incPc 1 $ lda (incPc 1 cpu) ZeroPageX
-    0xAD -> run . incPc 2 $ lda (incPc 1 cpu) Absolute
-    0xBD -> run . incPc 2 $ lda (incPc 1 cpu) AbsoluteX
-    0xB9 -> run . incPc 2 $ lda (incPc 1 cpu) AbsoluteY
-    0xA1 -> run . incPc 1 $ lda (incPc 1 cpu) IndirectX
-    0xB1 -> run . incPc 1 $ lda (incPc 1 cpu) IndirectY
-    0x85 -> run . incPc 1 $ sta (incPc 1 cpu) ZeroPage
-    0x95 -> run . incPc 1 $ sta (incPc 1 cpu) ZeroPageX
-    0x8D -> run . incPc 2 $ sta (incPc 1 cpu) Absolute
-    0x9D -> run . incPc 2 $ sta (incPc 1 cpu) AbsoluteX
-    0x99 -> run . incPc 2 $ sta (incPc 1 cpu) AbsoluteY
-    0x81 -> run . incPc 1 $ sta (incPc 1 cpu) IndirectX
-    0x91 -> run . incPc 1 $ sta (incPc 1 cpu) IndirectY
-    0x69 -> run . incPc 1 $ adc (incPc 1 cpu) Immediate
-    0x65 -> run . incPc 1 $ adc (incPc 1 cpu) ZeroPage
-    0x75 -> run . incPc 1 $ adc (incPc 1 cpu) ZeroPageX
-    0x6D -> run . incPc 2 $ adc (incPc 1 cpu) Absolute
-    0x7D -> run . incPc 2 $ adc (incPc 1 cpu) AbsoluteX
-    0x79 -> run . incPc 2 $ adc (incPc 1 cpu) AbsoluteY
-    0x61 -> run . incPc 1 $ adc (incPc 1 cpu) IndirectX
-    0x71 -> run . incPc 1 $ adc (incPc 1 cpu) IndirectY
-    0xE9 -> run . incPc 1 $ sbc (incPc 1 cpu) Immediate
-    0xE5 -> run . incPc 1 $ sbc (incPc 1 cpu) ZeroPage
-    0xF5 -> run . incPc 1 $ sbc (incPc 1 cpu) ZeroPageX
-    0xED -> run . incPc 2 $ sbc (incPc 1 cpu) Absolute
-    0xFD -> run . incPc 2 $ sbc (incPc 1 cpu) AbsoluteX
-    0xF9 -> run . incPc 2 $ sbc (incPc 1 cpu) AbsoluteY
-    0xE1 -> run . incPc 1 $ sbc (incPc 1 cpu) IndirectX
-    0xF1 -> run . incPc 1 $ sbc (incPc 1 cpu) IndirectY
-    _    -> error "Unknown opcode"
+    BRK          -> brk (incPc 1 cpu)
+    TAX          -> run . incPc 0 $ tax (incPc 1 cpu)
+    INX          -> run . incPc 0 $ inx (incPc 1 cpu)
+    LDAImmediate -> run . incPc 1 $ lda (incPc 1 cpu) Immediate
+    LDAZeroPage  -> run . incPc 1 $ lda (incPc 1 cpu) ZeroPage
+    LDAZeroPageX -> run . incPc 1 $ lda (incPc 1 cpu) ZeroPageX
+    LDAAbsolute  -> run . incPc 2 $ lda (incPc 1 cpu) Absolute
+    LDAAbsoluteX -> run . incPc 2 $ lda (incPc 1 cpu) AbsoluteX
+    LDAAbsoluteY -> run . incPc 2 $ lda (incPc 1 cpu) AbsoluteY
+    LDAIndirectX -> run . incPc 1 $ lda (incPc 1 cpu) IndirectX
+    LDAIndirectY -> run . incPc 1 $ lda (incPc 1 cpu) IndirectY
+    LDXImmediate -> run . incPc 1 $ ldx (incPc 1 cpu) Immediate
+    LDXZeroPage  -> run . incPc 1 $ ldx (incPc 1 cpu) ZeroPage
+    LDXZeroPageY -> run . incPc 1 $ ldx (incPc 1 cpu) ZeroPageY
+    LDXAbsolute  -> run . incPc 2 $ ldx (incPc 1 cpu) Absolute
+    LDXAbsoluteY -> run . incPc 2 $ ldx (incPc 1 cpu) AbsoluteY
+    STAZeroPage  -> run . incPc 1 $ sta (incPc 1 cpu) ZeroPage
+    STAZeroPageX -> run . incPc 1 $ sta (incPc 1 cpu) ZeroPageX
+    STAAbsolute  -> run . incPc 2 $ sta (incPc 1 cpu) Absolute
+    STAAbsoluteX -> run . incPc 2 $ sta (incPc 1 cpu) AbsoluteX
+    STAAbsoluteY -> run . incPc 2 $ sta (incPc 1 cpu) AbsoluteY
+    STAIndirectX -> run . incPc 1 $ sta (incPc 1 cpu) IndirectX
+    STAIndirectY -> run . incPc 1 $ sta (incPc 1 cpu) IndirectY
+    ADCImmediate -> run . incPc 1 $ adc (incPc 1 cpu) Immediate
+    ADCZeroPage  -> run . incPc 1 $ adc (incPc 1 cpu) ZeroPage
+    ADCZeroPageX -> run . incPc 1 $ adc (incPc 1 cpu) ZeroPageX
+    ADCAbsolute  -> run . incPc 2 $ adc (incPc 1 cpu) Absolute
+    ADCAbsoluteX -> run . incPc 2 $ adc (incPc 1 cpu) AbsoluteX
+    ADCAbsoluteY -> run . incPc 2 $ adc (incPc 1 cpu) AbsoluteY
+    ADCIndirectX -> run . incPc 1 $ adc (incPc 1 cpu) IndirectX
+    ADCIndirectY -> run . incPc 1 $ adc (incPc 1 cpu) IndirectY
+    SBCImmediate -> run . incPc 1 $ sbc (incPc 1 cpu) Immediate
+    SBCZeroPage  -> run . incPc 1 $ sbc (incPc 1 cpu) ZeroPage
+    SBCZeroPageX -> run . incPc 1 $ sbc (incPc 1 cpu) ZeroPageX
+    SBCAbsolute  -> run . incPc 2 $ sbc (incPc 1 cpu) Absolute
+    SBCAbsoluteX -> run . incPc 2 $ sbc (incPc 1 cpu) AbsoluteX
+    SBCAbsoluteY -> run . incPc 2 $ sbc (incPc 1 cpu) AbsoluteY
+    SBCIndirectX -> run . incPc 1 $ sbc (incPc 1 cpu) IndirectX
+    SBCIndirectY -> run . incPc 1 $ sbc (incPc 1 cpu) IndirectY
+    _            -> error "Unknown opcode"
   where
     opcode = memoryRead cpu (programCounter cpu)
     incPc i a = a {programCounter = programCounter a + i}
-
 
 incPc :: Cpu -> Word16 -> Cpu
 incPc cpu i = cpu {programCounter = programCounter cpu + i}

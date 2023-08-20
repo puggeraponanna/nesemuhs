@@ -1,16 +1,15 @@
 module NesEmuTest.Cpu.Flags where
 
-import Test.Hspec
-import NesEmu.Cpu.Flags
-import NesEmu.Cpu
+import           NesEmu.Cpu
+import           NesEmu.Cpu.Flags
+import           Test.Hspec
 
 spec :: Spec
 spec = do
-
   describe "setFlag" $ do
     it "sets the specified flag bit" $ do
       let cpu = setFlag Carry True newCpu
-      getFlag Carry cpu `shouldBe` True 
+      getFlag Carry cpu `shouldBe` True
 
   describe "getFlag" $ do
     it "returns True if the flag is set" $ do

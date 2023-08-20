@@ -2,8 +2,8 @@ module NesEmuTest.Cpu.Memory where
 
 import           NesEmu.Cpu
 import           NesEmu.Cpu.Memory
-import           NesEmu.Cpu.Types
 import           NesEmu.Cpu.Opcodes
+import           NesEmu.Cpu.Types
 import           Test.Hspec
 
 spec :: Spec
@@ -45,37 +45,36 @@ spec = do
 
     describe "ZeroPageX" $ do
       it "returns zeropage + X register" $ do
-        let cpu = newCpu { registerX = 0x05, memory = [0x30]}
+        let cpu = newCpu {registerX = 0x05, memory = [0x30]}
         getOperandAddress cpu ZeroPageX `shouldBe` 0x35
 
     describe "ZeroPageY" $ do
       it "returns zeropage + Y register" $ do
-        let cpu = newCpu { registerY = 0x05, memory = [0x30]}
+        let cpu = newCpu {registerY = 0x05, memory = [0x30]}
         getOperandAddress cpu ZeroPageY `shouldBe` 0x35
 
     describe "Absolute" $ do
       it "returns the 16-bit address" $ do
-        let cpu = newCpu { memory = [0x34, 0x12]}
+        let cpu = newCpu {memory = [0x34, 0x12]}
         getOperandAddress cpu Absolute `shouldBe` 0x1234
 
     describe "AbsoluteX" $ do
       it "returns absolute address + X register" $ do
-        let cpu = newCpu { registerX = 0x05, memory = [0x34, 0x12]}
+        let cpu = newCpu {registerX = 0x05, memory = [0x34, 0x12]}
         getOperandAddress cpu AbsoluteX `shouldBe` 0x1239
 
     describe "AbsoluteY" $ do
       it "returns absolute address + Y register" $ do
-        let cpu = newCpu { registerY = 0x05, memory = [0x34, 0x12]}
+        let cpu = newCpu {registerY = 0x05, memory = [0x34, 0x12]}
         getOperandAddress cpu AbsoluteY `shouldBe` 0x1239
 
     describe "IndirectX" $ do
       it "returns dereferenced address + X register" $ do
-        let cpu = newCpu { registerX = 0x05, memory = [0,0,0,0,0, 0x34, 0x12]}
+        let cpu = newCpu {registerX = 0x05, memory = [0, 0, 0, 0, 0, 0x34, 0x12]}
         getOperandAddress cpu IndirectX `shouldBe` 0x1234
 
     -- TODO: There might be some problem with this
     describe "IndirectY" $ do
       it "returns dereferenced address + Y register" $ do
-        let cpu = newCpu { registerY = 0x05, memory = [0, 0x34, 0x12]} 
+        let cpu = newCpu {registerY = 0x05, memory = [0, 0x34, 0x12]}
         getOperandAddress cpu IndirectY `shouldBe` 0x3405
-  

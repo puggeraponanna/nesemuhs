@@ -2,107 +2,121 @@ module NesEmu.Cpu.Opcodes where
 
 import           Data.Word (Word8)
 
-
 type OpCode = Word8
 
-opTax :: OpCode
-opTax = 0xAA
+pattern BRK :: OpCode
+pattern BRK = 0x00
 
-opInx :: OpCode
-opInx = 0xE8
+pattern TAX :: OpCode
+pattern TAX = 0xAA
 
-opBrk :: OpCode
-opBrk = 0x00
+pattern INX :: OpCode
+pattern INX = 0xE8
 
-opLdaImmediate :: OpCode
-opLdaImmediate = 0xA9
+pattern LDAImmediate :: OpCode
+pattern LDAImmediate = 0xA9
 
-opLdaZeroPage :: OpCode
-opLdaZeroPage = 0xA5
+pattern LDAZeroPage :: OpCode
+pattern LDAZeroPage = 0xA5
 
-opLdaZeroPageX :: OpCode
-opLdaZeroPageX = 0xB5
+pattern LDAZeroPageX :: OpCode
+pattern LDAZeroPageX = 0xB5
 
-opLdaAbsolute :: OpCode
-opLdaAbsolute = 0xAD
+pattern LDAAbsolute :: OpCode
+pattern LDAAbsolute = 0xAD
 
-opLdaAbsoluteX :: OpCode
-opLdaAbsoluteX = 0xBD
+pattern LDAAbsoluteX :: OpCode
+pattern LDAAbsoluteX = 0xBD
 
-opLdaAbsoluteY :: OpCode
-opLdaAbsoluteY = 0xB9
+pattern LDAAbsoluteY :: OpCode
+pattern LDAAbsoluteY = 0xB9
 
-opLdaIndirectX :: OpCode
-opLdaIndirectX = 0xA1
+pattern LDAIndirectX :: OpCode
+pattern LDAIndirectX = 0xA1
 
-opLdaIndirectY :: OpCode
-opLdaIndirectY = 0xB1
+pattern LDAIndirectY :: OpCode
+pattern LDAIndirectY = 0xB1
 
-opStaZeroPage :: OpCode
-opStaZeroPage = 0x85
+pattern LDXImmediate :: OpCode
+pattern LDXImmediate = 0xA2
 
-opStaZeroPageX :: OpCode
-opStaZeroPageX = 0x95
+pattern LDXZeroPage :: OpCode
+pattern LDXZeroPage = 0xA6
 
-opStaAbsolute :: OpCode
-opStaAbsolute = 0x8D
+pattern LDXZeroPageY :: OpCode
+pattern LDXZeroPageY = 0xB6
 
-opStaAbsoluteX :: OpCode
-opStaAbsoluteX = 0x9D
+pattern LDXAbsolute :: OpCode
+pattern LDXAbsolute = 0xAE
 
-opStaAbsoluteY :: OpCode
-opStaAbsoluteY = 0x99
+pattern LDXAbsoluteY :: OpCode
+pattern LDXAbsoluteY = 0xBE
 
-opStaIndirectX :: OpCode
-opStaIndirectX = 0x81
+pattern STAZeroPage :: OpCode
+pattern STAZeroPage = 0x85
 
-opStaIndirectY :: OpCode
-opStaIndirectY = 0x91
+pattern STAZeroPageX :: OpCode
+pattern STAZeroPageX = 0x95
 
-opAdcImmediate :: OpCode
-opAdcImmediate = 0x69
+pattern STAAbsolute :: OpCode
+pattern STAAbsolute = 0x8D
 
-opAdcZeroPage :: OpCode
-opAdcZeroPage = 0x65
+pattern STAAbsoluteX :: OpCode
+pattern STAAbsoluteX = 0x9D
 
-opAdcZeroPageX :: OpCode
-opAdcZeroPageX = 0x75
+pattern STAAbsoluteY :: OpCode
+pattern STAAbsoluteY = 0x99
 
-opAdcAbsolute :: OpCode
-opAdcAbsolute = 0x6D
+pattern STAIndirectX :: OpCode
+pattern STAIndirectX = 0x81
 
-opAdcAbsoluteX :: OpCode
-opAdcAbsoluteX = 0x7D
+pattern STAIndirectY :: OpCode
+pattern STAIndirectY = 0x91
 
-opAdcAbsoluteY :: OpCode
-opAdcAbsoluteY = 0x79
+pattern ADCImmediate :: OpCode
+pattern ADCImmediate = 0x69
 
-opAdcIndirectX :: OpCode
-opAdcIndirectX = 0x61
+pattern ADCZeroPage :: OpCode
+pattern ADCZeroPage = 0x65
 
-opAdcIndirectY :: OpCode
-opAdcIndirectY = 0x71
+pattern ADCZeroPageX :: OpCode
+pattern ADCZeroPageX = 0x75
 
-opSbcImmediate :: OpCode
-opSbcImmediate = 0xE9
+pattern ADCAbsolute :: OpCode
+pattern ADCAbsolute = 0x6D
 
-opSbcZeroPage :: OpCode
-opSbcZeroPage = 0xE5
+pattern ADCAbsoluteX :: OpCode
+pattern ADCAbsoluteX = 0x7D
 
-opSbcZeroPageX :: OpCode
-opSbcZeroPageX = 0xF5
+pattern ADCAbsoluteY :: OpCode
+pattern ADCAbsoluteY = 0x79
 
-opSbcAbsolute :: OpCode
-opSbcAbsolute = 0xED
+pattern ADCIndirectX :: OpCode
+pattern ADCIndirectX = 0x61
 
-opSbcAbsoluteX :: OpCode
-opSbcAbsoluteX = 0xFD
+pattern ADCIndirectY :: OpCode
+pattern ADCIndirectY = 0x71
 
-opSbcAbsoluteY :: OpCode
-opSbcAbsoluteY = 0xF9
+pattern SBCImmediate :: OpCode
+pattern SBCImmediate = 0xE9
 
-opSbcIndirectX :: OpCode
-opSbcIndirectX = 0xE1
+pattern SBCZeroPage :: OpCode
+pattern SBCZeroPage = 0xE5
 
-opSbcIndirectY :: OpCode
-opSbcIndirectY = 0xF1
+pattern SBCZeroPageX :: OpCode
+pattern SBCZeroPageX = 0xF5
+
+pattern SBCAbsolute :: OpCode
+pattern SBCAbsolute = 0xED
+
+pattern SBCAbsoluteX :: OpCode
+pattern SBCAbsoluteX = 0xFD
+
+pattern SBCAbsoluteY :: OpCode
+pattern SBCAbsoluteY = 0xF9
+
+pattern SBCIndirectX :: OpCode
+pattern SBCIndirectX = 0xE1
+
+pattern SBCIndirectY :: OpCode
+pattern SBCIndirectY = 0xF1

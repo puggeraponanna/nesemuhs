@@ -27,8 +27,15 @@ library
     hs-source-dirs: src
     exposed-modules:
         NesEmu.Cpu
+        NesEmu.Cpu.Flags
+        NesEmu.Cpu.Memory
+        NesEmu.Cpu.Types
+        NesEmu.Cpu.Opcodes
+        NesEmu.Cpu.Operations
     ghc-options:
         -Wall
+    default-extensions:
+        PatternSynonyms
      
 executable nesemu
     main-is:          Main.hs
@@ -44,7 +51,9 @@ test-suite nesemu-test
     hs-source-dirs: tests
     main-is: Main.hs
     other-modules:
-        CpuSpec
+        NesEmuTest.Cpu
+        NesEmuTest.Cpu.Memory
+        NesEmuTest.Cpu.Flags
     build-depends:
         base ^>=4.16.4.0
       , nesemuhs

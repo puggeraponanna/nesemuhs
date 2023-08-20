@@ -1,8 +1,10 @@
 module Main where
 
-import qualified CpuSpec    as Cpu
-import           Test.Hspec
+import qualified NesEmuTest.Cpu.Flags as Flags
+import qualified NesEmuTest.Cpu.Memory as Memory
+import Test.Hspec ( hspec )
 
 main :: IO ()
 main = hspec $ do
-  Cpu.spec
+  Flags.spec
+  Memory.spec

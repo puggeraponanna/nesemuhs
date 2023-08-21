@@ -7,6 +7,6 @@ import           Test.Hspec                (hspec)
 
 main :: IO ()
 main = hspec $ do
-  Flags.spec
-  Memory.spec
-  Operations.spec
+    Flags.spec
+    Memory.spec
+    Operations.spec

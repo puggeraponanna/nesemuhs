@@ -5,11 +5,11 @@ import           Data.Word
 import           NesEmu.Cpu.Types
 
 data Flag = Carry | Zero | Interrupt | Decimal | Break | Unused | Overflow | Negative
-  deriving (Enum)
+    deriving (Enum)
 
 setFlag :: Flag -> Bool -> Cpu -> Cpu
-setFlag flag True cpu  = cpu {status = setBit (status cpu) (fromEnum flag)}
-setFlag flag False cpu = cpu {status = clearBit (status cpu) (fromEnum flag)}
+setFlag flag True cpu  = cpu{status = setBit (status cpu) (fromEnum flag)}
+setFlag flag False cpu = cpu{status = clearBit (status cpu) (fromEnum flag)}
 
 getFlag :: Flag -> Cpu -> Bool
 getFlag flag cpu = testBit (status cpu) (fromEnum flag)

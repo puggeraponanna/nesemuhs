@@ -4,4 +4,4 @@ import           NesEmu.Cpu
 
 main :: IO ()
 main = do
-  print "Hello"
+    print "Hello"

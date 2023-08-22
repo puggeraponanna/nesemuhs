@@ -1,6 +1,6 @@
 module NesEmu.Cpu.Opcodes where
 
-import           Data.Word (Word8)
+import           Data.Word (Word8, Word16)
 
 type OpCode = Word8
 
@@ -51,6 +51,23 @@ pattern LDXAbsolute = 0xAE
 
 pattern LDXAbsoluteY :: OpCode
 pattern LDXAbsoluteY = 0xBE
+
+-- TODO: Fix opcodes
+pattern LDYImmediate :: OpCode
+pattern LDYImmediate = undefined
+
+pattern LDYZeroPage :: OpCode
+pattern LDYZeroPage = undefined
+
+pattern LDYZeroPageY :: OpCode
+pattern LDYZeroPageY = undefined
+
+pattern LDYAbsolute :: OpCode
+pattern LDYAbsolute = undefined
+
+pattern LDYAbsoluteY :: OpCode
+pattern LDYAbsoluteY = undefined
+
 
 pattern STAZeroPage :: OpCode
 pattern STAZeroPage = 0x85
@@ -120,3 +137,46 @@ pattern SBCIndirectX = 0xE1
 
 pattern SBCIndirectY :: OpCode
 pattern SBCIndirectY = 0xF1
+
+
+getCycleCount :: OpCode -> Word16
+getCycleCount BRK          = 7
+getCycleCount TAX          = 0
+getCycleCount INX          = 0
+getCycleCount LDAImmediate = 1
+getCycleCount LDAZeroPage  = 1
+getCycleCount LDAZeroPageX = 1
+getCycleCount LDAAbsolute  = 2
+getCycleCount LDAAbsoluteX = 2
+getCycleCount LDAAbsoluteY = 2
+getCycleCount LDAIndirectX = 1
+getCycleCount LDAIndirectY = 1
+getCycleCount LDXImmediate = 1
+getCycleCount LDXZeroPage  = 1
+getCycleCount LDXZeroPageY = 1
+getCycleCount LDXAbsolute  = 2
+getCycleCount LDXAbsoluteY = 2
+getCycleCount STAZeroPage  = 1
+getCycleCount STAZeroPageX = 1
+getCycleCount STAAbsolute  = 2
+getCycleCount STAAbsoluteX = 2
+getCycleCount STAAbsoluteY = 2
+getCycleCount STAIndirectX = 1
+getCycleCount STAIndirectY = 1
+getCycleCount ADCImmediate = 1
+getCycleCount ADCZeroPage  = 1
+getCycleCount ADCZeroPageX = 1
+getCycleCount ADCAbsolute  = 2
+getCycleCount ADCAbsoluteX = 2
+getCycleCount ADCAbsoluteY = 2
+getCycleCount ADCIndirectX = 1
+getCycleCount ADCIndirectY = 1
+getCycleCount SBCImmediate = 1
+getCycleCount SBCZeroPage  = 1
+getCycleCount SBCZeroPageX = 1
+getCycleCount SBCAbsolute  = 2
+getCycleCount SBCAbsoluteX = 2
+getCycleCount SBCAbsoluteY = 2
+getCycleCount SBCIndirectX = 1
+getCycleCount SBCIndirectY = 1
+getCycleCount _            = error "Unknown opcode"

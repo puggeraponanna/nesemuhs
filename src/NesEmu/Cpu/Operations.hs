@@ -1,6 +1,5 @@
 module NesEmu.Cpu.Operations (getOperation, getCycleCount) where
 
-import           Data.Word
 import           NesEmu.Cpu.Flags
 import           NesEmu.Cpu.Memory
 import           NesEmu.Cpu.Opcodes
@@ -86,6 +85,40 @@ inx _ cpu =
             , status = status'
             }
 
+dex :: AddressingMode -> Cpu -> Cpu
+dex _ cpu =
+    let result = registerX cpu - 1
+        status' = status $ setZF result $ setNF result cpu
+     in cpu
+            { registerX = result
+            , status = status'
+            }
+
+dey :: AddressingMode -> Cpu -> Cpu
+dey _ cpu =
+    let result = registerY cpu - 1
+        status' = status $ setZF result $ setNF result cpu
+     in cpu
+            { registerY = result
+            , status = status'
+            }
+
+inc :: AddressingMode -> Cpu -> Cpu
+inc addrMode cpu =
+    let addr = getOperandAddress cpu addrMode
+        val = memoryRead cpu addr
+        result = val + 1
+        cpu' = memoryWrite cpu addr result
+     in setZF result $ setNF result cpu'
+
+dec :: AddressingMode -> Cpu -> Cpu
+dec addrMode cpu =
+    let addr = getOperandAddress cpu addrMode
+        val = memoryRead cpu addr
+        result = val - 1
+        cpu' = memoryWrite cpu addr result
+     in setZF result $ setNF result cpu'
+
 brk :: AddressingMode -> Cpu -> Cpu
 brk _ cpu = cpu
 
@@ -93,6 +126,16 @@ getOperation :: OpCode -> Operation
 getOperation BRK          = brk NoneAddressing
 getOperation TAX          = tax NoneAddressing
 getOperation INX          = inx NoneAddressing
+getOperation DEX          = dex NoneAddressing
+getOperation DEY          = dey NoneAddressing
+getOperation INCZeroPage  = inc ZeroPage
+getOperation INCZeroPageX = inc ZeroPageX
+getOperation INCAbsolute  = inc Absolute
+getOperation INCAbsoluteX = inc AbsoluteX
+getOperation DECZeroPage  = dec ZeroPage
+getOperation DECZeroPageX = dec ZeroPageX
+getOperation DECAbsolute  = dec Absolute
+getOperation DECAbsoluteX = dec AbsoluteX
 getOperation LDAImmediate = lda Immediate
 getOperation LDAZeroPage  = lda ZeroPage
 getOperation LDAZeroPageX = lda ZeroPageX
@@ -135,4 +178,3 @@ getOperation SBCAbsoluteY = sbc AbsoluteY
 getOperation SBCIndirectX = sbc IndirectX
 getOperation SBCIndirectY = sbc IndirectY
 getOperation _            = error "Unknown opcode"
-

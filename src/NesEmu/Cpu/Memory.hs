@@ -28,10 +28,10 @@ getOperandAddress cpu ZeroPage =
 getOperandAddress cpu Absolute = memoryRead16 cpu (programCounter cpu)
 getOperandAddress cpu ZeroPageX =
     let pos = memoryRead cpu (programCounter cpu)
-     in fromIntegral pos + fromIntegral (registerX cpu)
+     in fromIntegral $ (pos + registerX cpu) .&. 0xFF
 getOperandAddress cpu ZeroPageY =
     let pos = memoryRead cpu (programCounter cpu)
-     in fromIntegral pos + fromIntegral (registerY cpu)
+     in fromIntegral $ (pos + registerY cpu) .&. 0xFF
 getOperandAddress cpu AbsoluteX =
     let base = memoryRead16 cpu (programCounter cpu)
      in base + fromIntegral (registerX cpu)
@@ -42,18 +42,22 @@ getOperandAddress cpu IndirectX =
     let base = memoryRead cpu (programCounter cpu)
         ptr = base + registerX cpu
         lo = fromIntegral $ memoryRead cpu (fromIntegral ptr)
-        hi = fromIntegral $ memoryRead cpu (fromIntegral ptr + 1)
+        hi = fromIntegral $ memoryRead cpu (fromIntegral ((ptr + 1) .&. 0xFF))
      in (hi `shiftL` 8) + lo
 getOperandAddress cpu IndirectY =
-    let base = memoryRead cpu (programCounter cpu)
-        lo = memoryRead cpu (fromIntegral base)
-        hi = memoryRead cpu (fromIntegral base + 1)
+    let ptr = memoryRead cpu (programCounter cpu)
+        lo = memoryRead cpu (fromIntegral ptr)
+        hi = memoryRead cpu (fromIntegral ((ptr + 1) .&. 0xFF))
         deref_base = (fromIntegral hi `shiftL` 8) + fromIntegral lo
      in deref_base + fromIntegral (registerY cpu)
-getOperandAddress _ Indirect = 0
+getOperandAddress cpu Indirect =
+    let ptr = memoryRead16 cpu (programCounter cpu)
+        lo = memoryRead cpu ptr
+        hi = memoryRead cpu (if (ptr .&. 0xFF) == 0xFF then ptr .&. 0xFF00 else ptr + 1)
+     in (fromIntegral hi `shiftL` 8) + fromIntegral lo
 getOperandAddress _ Relative = 0
 getOperandAddress _ Accumulator = 0
-getOperandAddress _ NoneAddressing = undefined
+getOperandAddress _ NoneAddressing = 0
 
 memoryWrite :: Cpu -> Word16 -> Word8 -> Cpu
 memoryWrite cpu addr val =

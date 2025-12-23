@@ -24,6 +24,7 @@ library
     build-depends:
         base >=4.16 && <4.22
       , lens
+      , bytestring
     hs-source-dirs: src
     exposed-modules:
         NesEmu.Cpu
@@ -32,6 +33,7 @@ library
         NesEmu.Cpu.Types
         NesEmu.Cpu.Opcodes
         NesEmu.Cpu.Operations
+        NesEmu.Rom
     ghc-options:
         -Wall
     default-extensions:

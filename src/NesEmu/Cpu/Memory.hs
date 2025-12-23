@@ -12,8 +12,11 @@ data AddressingMode
     | Absolute
     | AbsoluteX
     | AbsoluteY
+    | Relative
+    | Indirect
     | IndirectX
     | IndirectY
+    | Accumulator
     | NoneAddressing
     deriving (Show)
 
@@ -47,6 +50,9 @@ getOperandAddress cpu IndirectY =
         hi = memoryRead cpu (fromIntegral base + 1)
         deref_base = (fromIntegral hi `shiftL` 8) + fromIntegral lo
      in deref_base + fromIntegral (registerY cpu)
+getOperandAddress _ Indirect = 0
+getOperandAddress _ Relative = 0
+getOperandAddress _ Accumulator = 0
 getOperandAddress _ NoneAddressing = undefined
 
 memoryWrite :: Cpu -> Word16 -> Word8 -> Cpu

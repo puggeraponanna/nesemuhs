@@ -13,6 +13,7 @@ reset cpu =
         , registerX = 0
         , registerY = 0
         , status = 0
+        , stackPointer = 0xFD
         , programCounter = memoryRead16 cpu 0xFFFC
         }
 
@@ -23,6 +24,7 @@ newCpu =
         , registerX = 0
         , registerY = 0
         , status = 0
+        , stackPointer = 0xFD
         , programCounter = 0
         , memory = replicate 0x10000 0
         }

@@ -7,6 +7,7 @@ data Cpu = Cpu
     , registerX      :: !Word8
     , registerY      :: !Word8
     , status         :: !Word8
+    , stackPointer   :: !Word8
     , programCounter :: !Word16
     , memory         :: ![Word8]
     }

@@ -24,7 +24,7 @@ newCpu =
         , registerY = 0
         , status = 0
         , programCounter = 0
-        , memory = replicate 0xFFFF 0
+        , memory = replicate 0x10000 0
         }
 
 loadAndRun :: Cpu -> [Word8] -> Cpu
@@ -41,14 +41,14 @@ loadProgram cpu pgm =
     l = length pgm + 0x8000
 
 run :: Cpu -> Cpu
-run cpu = do
+run cpu =
     let opcode = memoryRead cpu (programCounter cpu)
         cpu' = incrementPc cpu 1
         cpu'' = getOperation opcode cpu'
-        cpu''' = incrementPc cpu'' $ getCycleCount opcode
-    case opcode of
-        BRK -> cpu'''
-        _   -> run cpu'''
+        cpu''' = incrementPc cpu'' $ getOperandLength opcode
+     in case opcode of
+            BRK -> cpu'''
+            _   -> run cpu'''
 
 incrementPc :: Cpu -> Word16 -> Cpu
 incrementPc cpu i = cpu{programCounter = programCounter cpu + i}

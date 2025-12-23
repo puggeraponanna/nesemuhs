@@ -1,5 +1,7 @@
-module NesEmu.Cpu.Operations (getOperation, getCycleCount) where
+module NesEmu.Cpu.Operations (getOperation, getOperandLength) where
 
+import           Data.Bits
+import           Data.Word        (Word16, Word8)
 import           NesEmu.Cpu.Flags
 import           NesEmu.Cpu.Memory
 import           NesEmu.Cpu.Opcodes
@@ -54,11 +56,16 @@ tax _ cpu =
 
 adc :: AddressingMode -> Cpu -> Cpu
 adc addrMode cpu =
-    let a = registerA cpu
-        b = memoryRead cpu (getOperandAddress cpu addrMode)
+    let a = fromIntegral (registerA cpu) :: Word16
+        b = fromIntegral (memoryRead cpu (getOperandAddress cpu addrMode)) :: Word16
         c = if getFlag Carry cpu then 1 else 0
-        result = a + b + c
-        status' = status $ setZF result $ setNF result $ setCF (result > 255) $ setVF a b c cpu
+        total = a + b + c
+        result = fromIntegral (total .&. 0xFF) :: Word8
+        status' = status $ 
+                  setZF result $ 
+                  setNF result $ 
+                  setCF (total > 0xFF) $ 
+                  setVF (fromIntegral a) (fromIntegral b) result cpu
      in cpu
             { registerA = result
             , status = status'
@@ -66,11 +73,17 @@ adc addrMode cpu =
 
 sbc :: AddressingMode -> Cpu -> Cpu
 sbc addrMode cpu =
-    let a = registerA cpu
-        b = memoryRead cpu (getOperandAddress cpu addrMode)
+    let a = fromIntegral (registerA cpu) :: Word16
+        b = fromIntegral (memoryRead cpu (getOperandAddress cpu addrMode)) :: Word16
         c = if getFlag Carry cpu then 1 else 0
-        result = a - b - c
-        status' = status $ setZF result $ setNF result $ setCF (result > 255) $ setVF a b c cpu
+        b' = b `xor` 0xFF
+        total = a + b' + c
+        result = fromIntegral (total .&. 0xFF) :: Word8
+        status' = status $ 
+                  setZF result $ 
+                  setNF result $ 
+                  setCF (total > 0xFF) $ 
+                  setVF (fromIntegral a) (fromIntegral b') result cpu
      in cpu
             { registerA = result
             , status = status'

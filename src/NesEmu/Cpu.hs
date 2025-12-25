@@ -61,20 +61,22 @@ loadRomIntoCpu cpu rom pcOverride =
             Just pc -> cpu''{programCounter = pc}
             Nothing -> cpu''
 
-step :: Cpu -> (Word8, Cpu)
+step :: Cpu -> Maybe (Cpu, Int)
 step cpu =
     let opcode = memoryRead cpu (programCounter cpu)
         cpu' = incrementPc cpu 1
         cpu'' = getOperation opcode cpu'
         cpu''' = incrementPc cpu'' $ getOperandLength opcode
-     in (opcode, cpu''')
+        cycles = getCycles opcode
+     in if opcode == 0x00 -- BRK
+            then Nothing
+            else Just (cpu''', cycles)
 
 run :: Cpu -> Cpu
 run cpu =
-    let (opcode, cpu') = step cpu
-     in if opcode == 0x00 -- BRK
-            then cpu'
-            else run cpu'
+    case step cpu of
+        Nothing        -> cpu
+        Just (cpu', _) -> run cpu'
 
 runDebug :: Cpu -> IO Cpu
 runDebug cpu = do
@@ -89,13 +91,11 @@ runDebug cpu = do
                 (registerY cpu)
                 (status cpu)
                 (stackPointer cpu)
-    if opcode == 0x00 -- BRK
-        then return cpu
-        else do
-            putStrLn logMsg
-            hFlush stdout
-            let (_, cpu') = step cpu
-            runDebug cpu'
+    putStrLn logMsg
+    hFlush stdout
+    case step cpu of
+        Nothing        -> return cpu
+        Just (cpu', _) -> runDebug cpu'
 
 incrementPc :: Cpu -> Word16 -> Cpu
 incrementPc cpu i = cpu{programCounter = programCounter cpu + i}

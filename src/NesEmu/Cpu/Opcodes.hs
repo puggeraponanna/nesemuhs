@@ -578,3 +578,46 @@ getOperandLength RRAAbsoluteY = 2
 getOperandLength RRAIndirectX = 1
 getOperandLength RRAIndirectY = 1
 getOperandLength _ = error "Unknown opcode"
+
+getCycles :: OpCode -> Int
+getCycles op = case op of
+    BRK          -> 7
+    TAX          -> 2
+    INX          -> 2
+    INY          -> 2
+    DEX          -> 2
+    DEY          -> 2
+    NOP          -> 2
+    -- LDA
+    LDAImmediate -> 2
+    LDAZeroPage  -> 3
+    LDAZeroPageX -> 4
+    LDAAbsolute  -> 4
+    LDAAbsoluteX -> 4
+    LDAAbsoluteY -> 4
+    LDAIndirectX -> 6
+    LDAIndirectY -> 5
+    -- STA
+    STAZeroPage  -> 3
+    STAZeroPageX -> 4
+    STAAbsolute  -> 4
+    STAAbsoluteX -> 5
+    STAAbsoluteY -> 5
+    STAIndirectX -> 6
+    STAIndirectY -> 6
+    -- Branches
+    BCC          -> 2
+    BCS          -> 2
+    BEQ          -> 2
+    BMI          -> 2
+    BNE          -> 2
+    BPL          -> 2
+    BVC          -> 2
+    BVS          -> 2
+    -- Jumps
+    JMPAbsolute  -> 3
+    JMPIndirect  -> 5
+    JSRAbsolute  -> 6
+    RTS          -> 6
+    RTI          -> 6
+    _            -> 2

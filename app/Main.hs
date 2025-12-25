@@ -2,7 +2,9 @@ module Main where
 
 import           NesEmu.Cpu
 import           NesEmu.Cpu.Memory  (memoryRead)
+import           NesEmu.Ppu
 import           NesEmu.Rom
+import           NesEmu.UI
 import           System.Environment (getArgs)
 import           System.Exit        (exitFailure)
 import           Text.Printf        (printf)
@@ -25,6 +27,5 @@ runRom path = do
             exitFailure
         Right rom -> do
             let cpu = loadRomIntoCpu newCpu rom (Just 0xC000)
-            cpu' <- runDebug cpu
-            putStrLn $ printf "nestest results: %02X %02X" (memoryRead cpu' 0x0002) (memoryRead cpu' 0x0003)
+            runUI cpu newPpu
             return ()
